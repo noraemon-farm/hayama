@@ -20,18 +20,18 @@ h1{font-size:20px;color:var(--navy);font-weight:600;margin-bottom:2px;}
 label{display:flex;align-items:center;gap:6px;margin:3px 0;cursor:pointer;line-height:1.4;}
 .sw{width:14px;height:14px;border-radius:3px;display:inline-block;flex:none;border:1px solid rgba(0,0,0,.2);}
 .dot{width:14px;height:14px;border-radius:50%;display:inline-block;flex:none;border:2px solid #fff;box-shadow:0 0 0 1px rgba(0,0,0,.3);}
+.fac-sq{width:16px;height:16px;border-radius:2px;display:inline-flex;flex:none;align-items:center;justify-content:center;color:#fff;font-size:10px;border:1px solid #fff;box-shadow:0 0 0 1px rgba(0,0,0,.3);}
 .leg{font-size:11px;color:#555;margin-top:8px;line-height:1.6;}
-.depthbar{display:flex;height:12px;border-radius:3px;overflow:hidden;margin:4px 0;max-width:200px;}
-.depthbar span{flex:1;}
+.depthtbl{border-collapse:collapse;margin-top:4px;font-size:10px;color:#555;}
+.depthtbl td{padding:1px 4px 1px 0;}
+.ds{width:14px;height:11px;border-radius:2px;display:inline-block;border:1px solid rgba(0,0,0,.15);vertical-align:middle;}
 .note{font-size:11px;color:#888;margin-top:10px;line-height:1.7;}
 .marker-pin{border-radius:50%;border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:11px;}
-.fac-pin{border-radius:50%;border:2px solid #fff;box-shadow:0 1px 3px rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center;color:#fff;font-size:12px;}
+.fac-pin{border-radius:3px;border:2px solid #fff;box-shadow:0 1px 3px rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center;color:#fff;font-size:12px;font-weight:600;}
 .pop b{color:var(--navy);}
 .pop table{border-collapse:collapse;margin-top:4px;font-size:12px;}
 .pop td{padding:1px 6px 1px 0;}
 .pop .v{font-weight:600;text-align:right;}
-.opacity-row{display:flex;align-items:center;gap:8px;font-size:12px;margin-top:6px;}
-.opacity-row input{width:90px;}
 </style>
 </head>
 <body>
@@ -45,22 +45,24 @@ label{display:flex;align-items:center;gap:6px;margin:3px 0;cursor:pointer;line-h
 <label><input type="radio" name="flood" value="tsunami">津波浸水想定</label>
 <label><input type="radio" name="flood" value="takashio">高潮浸水想定</label>
 <label><input type="radio" name="flood" value="flood">洪水浸水想定</label>
-<div class="leg">浸水深の色（3種共通）:
-<div class="depthbar"><span style="background:#f7f5a9"></span><span style="background:#ffd8a8"></span><span style="background:#ff9a9a"></span><span style="background:#e57373"></span><span style="background:#c58ac5"></span></div>
-浅い ← → 深い</div>
+<div class="leg">浸水深の色（津波・高潮・洪水 共通）:
+<table class="depthtbl">
+<tr><td><span class="ds" style="background:#f7f5a9"></span></td><td>0.5m未満</td><td><span class="ds" style="background:#ffd8a8"></span></td><td>0.5〜3m</td></tr>
+<tr><td><span class="ds" style="background:#ff9a9a"></span></td><td>3〜5m</td><td><span class="ds" style="background:#e57373"></span></td><td>5〜10m</td></tr>
+<tr><td><span class="ds" style="background:#c58ac5"></span></td><td>10〜20m</td><td><span class="ds" style="background:#a56aab"></span></td><td>20m以上</td></tr>
+</table></div>
 </div>
 <div class="group">
 <h3>土砂災害（重ねて表示可）</h3>
-<label><input type="checkbox" id="h_kyukei"><span class="sw" style="background:#e6a23c"></span>急傾斜地の崩壊</label>
-<label><input type="checkbox" id="h_doseki"><span class="sw" style="background:#d98c3c"></span>土石流</label>
-<div class="opacity-row">ハザード濃度 <input type="range" id="op" min="20" max="90" value="55"></div>
+<label><input type="checkbox" id="h_kyukei">急傾斜地の崩壊</label>
+<label><input type="checkbox" id="h_doseki">土石流</label>
 </div>
 <div class="group">
 <h3>要配慮者・施設</h3>
 <label><input type="checkbox" id="m_priority" checked><span class="dot" style="background:var(--red)"></span>重点度（大字）</label>
-<label><input type="checkbox" id="m_shelter" checked><span class="fac-pin" style="width:16px;height:16px;background:var(--navy)">避</span>指定避難所</label>
-<label><input type="checkbox" id="m_care" checked><span class="fac-pin" style="width:16px;height:16px;background:var(--teal)">福</span>要配慮者利用施設</label>
-<div class="leg">大字マーカー色＝重点度：<span style="color:var(--red)">■</span>高 <span style="color:var(--amber)">■</span>中 <span style="color:var(--green)">■</span>中〜低</div>
+<label><input type="checkbox" id="m_shelter" checked><span class="fac-sq" style="background:var(--navy)">避</span>指定避難所</label>
+<label><input type="checkbox" id="m_care" checked><span class="fac-sq" style="background:var(--teal)">福</span>要配慮者利用施設</label>
+<div class="leg">大字マーカー色＝重点度（〇）：<span style="color:var(--red)">●</span>高 <span style="color:var(--amber)">●</span>中 <span style="color:var(--green)">●</span>中〜低<br>施設は■で表示</div>
 </div>
 </div>
 <div id="map"></div>
@@ -84,7 +86,7 @@ const SEDIMENT={
  h_kyukei:"https://disaportaldata.gsi.go.jp/raster/05_kyukeishakeikaikuiki_data/14/{z}/{x}/{y}.png",
  h_doseki:"https://disaportaldata.gsi.go.jp/raster/05_dosekiryukeikaikuiki_data/14/{z}/{x}/{y}.png"
 };
-let curOp=0.55;
+const OP=0.75;
 
 // 浸水系＝排他（ラジオ）
 let floodLayer=null;
@@ -93,7 +95,7 @@ document.querySelectorAll('input[name="flood"]').forEach(r=>{
   if(floodLayer){map.removeLayer(floodLayer);floodLayer=null;}
   const v=e.target.value;
   if(v!=="none"){
-   floodLayer=L.tileLayer(FLOOD[v],{opacity:curOp,maxZoom:18,attribution:"ハザードマップポータルサイト"}).addTo(map);
+   floodLayer=L.tileLayer(FLOOD[v],{opacity:OP,maxZoom:18,attribution:"ハザードマップポータルサイト"}).addTo(map);
   }
  });
 });
@@ -101,16 +103,11 @@ document.querySelectorAll('input[name="flood"]').forEach(r=>{
 // 土砂系＝重ねOK（チェックボックス）
 const sedLayers={};
 for(const id in SEDIMENT){
- sedLayers[id]=L.tileLayer(SEDIMENT[id],{opacity:curOp,maxZoom:18,attribution:"ハザードマップポータルサイト"});
+ sedLayers[id]=L.tileLayer(SEDIMENT[id],{opacity:OP,maxZoom:18,attribution:"ハザードマップポータルサイト"});
  document.getElementById(id).addEventListener("change",e=>{
   e.target.checked?sedLayers[id].addTo(map):map.removeLayer(sedLayers[id]);
  });
 }
-document.getElementById("op").addEventListener("input",e=>{
- curOp=e.target.value/100;
- if(floodLayer)floodLayer.setOpacity(curOp);
- for(const id in sedLayers)sedLayers[id].setOpacity(curOp);
-});
 
 // 大字マーカー
 const prc={"高":"#B03024","中":"#C87E00","中〜低":"#2E7D32"};
@@ -141,8 +138,8 @@ document.getElementById("m_priority").addEventListener("change",e=>{
 // 指定避難所マーカー
 const shelters=L.layerGroup();
 FAC.shelters.forEach(s=>{
- const icon=L.divIcon({className:"",iconSize:[22,22],iconAnchor:[11,11],
-  html:'<div class="fac-pin" style="width:22px;height:22px;background:#1F3864">避</div>'});
+ const icon=L.divIcon({className:"",iconSize:[20,20],iconAnchor:[10,10],
+  html:'<div class="fac-pin" style="width:20px;height:20px;background:#1F3864">避</div>'});
  const m=L.marker([s.lat,s.lng],{icon,zIndexOffset:50});
  m.bindPopup('<div class="pop"><b>'+s.name+'</b><br>指定避難所（'+s.area+'地区）</div>');
  shelters.addLayer(m);
@@ -155,8 +152,8 @@ document.getElementById("m_shelter").addEventListener("change",e=>{
 // 要配慮者利用施設マーカー
 const care=L.layerGroup();
 FAC.care.forEach(c=>{
- const icon=L.divIcon({className:"",iconSize:[22,22],iconAnchor:[11,11],
-  html:'<div class="fac-pin" style="width:22px;height:22px;background:#0F6E56">福</div>'});
+ const icon=L.divIcon({className:"",iconSize:[20,20],iconAnchor:[10,10],
+  html:'<div class="fac-pin" style="width:20px;height:20px;background:#0F6E56">福</div>'});
  const m=L.marker([c.lat,c.lng],{icon,zIndexOffset:50});
  m.bindPopup('<div class="pop"><b>'+c.name+'</b><br>'+c.type+'（'+c.area+'地区）<br><span style="font-size:11px;color:#888">浸水・土砂区域内なら避難確保計画の作成義務対象</span></div>');
  care.addLayer(m);
