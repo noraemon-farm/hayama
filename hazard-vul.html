@@ -1,1 +1,111 @@
-
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>葉山町 ハザード×要配慮者 重ね合わせマップ</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>
+:root{--navy:#1F3864;--red:#B03024;--amber:#C87E00;--green:#2E7D32;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:"Helvetica Neue",Arial,"Hiragino Sans","Yu Gothic",sans-serif;color:#222;}
+#wrap{max-width:1100px;margin:0 auto;padding:12px;}
+h1{font-size:20px;color:var(--navy);font-weight:600;margin-bottom:2px;}
+.sub{font-size:13px;color:#666;margin-bottom:10px;}
+#map{height:560px;width:100%;border:1px solid #ccc;border-radius:8px;}
+.panel{display:flex;flex-wrap:wrap;gap:18px;margin:10px 0;padding:12px;background:#f7f7f4;border-radius:8px;}
+.group{font-size:13px;}
+.group h3{font-size:12px;color:var(--navy);margin-bottom:6px;font-weight:600;}
+label{display:flex;align-items:center;gap:6px;margin:3px 0;cursor:pointer;line-height:1.4;}
+.sw{width:14px;height:14px;border-radius:3px;display:inline-block;flex:none;border:1px solid rgba(0,0,0,.2);}
+.leg{font-size:12px;color:#555;margin-top:8px;line-height:1.6;}
+.note{font-size:11px;color:#888;margin-top:10px;line-height:1.7;}
+.marker-pin{border-radius:50%;border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:11px;}
+.pop b{color:var(--navy);}
+.pop table{border-collapse:collapse;margin-top:4px;font-size:12px;}
+.pop td{padding:1px 6px 1px 0;}
+.pop .v{font-weight:600;text-align:right;}
+.opacity-row{display:flex;align-items:center;gap:8px;font-size:12px;margin-top:6px;}
+.opacity-row input{width:90px;}
+</style>
+</head>
+<body>
+<div id="wrap">
+<h1>葉山町 ハザード × 要配慮者 重ね合わせマップ</h1>
+<div class="sub">国土交通省「重ねるハザードマップ」の区域データと、大字別の要配慮者分布を重ねて表示。チェックで各レイヤーを切り替えられます。</div>
+<div class="panel">
+<div class="group">
+<h3>ハザードレイヤー（浸水系）</h3>
+<label><input type="checkbox" id="h_tsunami"><span class="sw" style="background:#3399ff"></span>津波浸水想定</label>
+<label><input type="checkbox" id="h_takashio"><span class="sw" style="background:#b088d8"></span>高潮浸水想定</label>
+<label><input type="checkbox" id="h_flood"><span class="sw" style="background:#5fb0e5"></span>洪水浸水想定</label>
+</div>
+<div class="group">
+<h3>土砂災害レイヤー</h3>
+<label><input type="checkbox" id="h_kyukei"><span class="sw" style="background:#e6a23c"></span>急傾斜地の崩壊</label>
+<label><input type="checkbox" id="h_doseki"><span class="sw" style="background:#d98c3c"></span>土石流</label>
+<div class="opacity-row">ハザード濃度 <input type="range" id="op" min="20" max="90" value="60"></div>
+</div>
+<div class="group">
+<h3>要配慮者レイヤー</h3>
+<label><input type="checkbox" id="m_priority" checked><span class="sw" style="background:var(--red)"></span>重点度（大字マーカー）</label>
+<div class="leg">マーカー色＝重点度：<span style="color:var(--red)">■</span>高 <span style="color:var(--amber)">■</span>中 <span style="color:var(--green)">■</span>中〜低<br>円の大きさ＝65歳以上人口。クリックで詳細表示。</div>
+</div>
+</div>
+<div id="map"></div>
+<div class="note">
+出典：ハザード区域は<a href="https://disaportal.gsi.go.jp/hazardmapportal/hazardmap/copyright/opendata.html" target="_blank">ハザードマップポータルサイト（国土交通省）</a>／背景地図は地理院タイル（国土地理院）。要配慮者データは令和2年国勢調査・葉山町統計・介護保険事業状況報告に基づく（重度要介護は75歳以上按分推計）。<br>
+※ハザード区域は神奈川県配信分。津波・高潮は沿岸部、土砂災害は丘陵部でズームすると区域が表示されます。実際の避難判断は葉山町の公式ハザードマップで確認してください。
+</div>
+</div>
+<script>
+const DATA=[{"name": "一色", "lat": 35.2668114, "lng": 139.5865752, "total": 8929, "rate": 31.3, "o65": 2791, "severe": 189, "infant": 237, "foreign": 106, "haz": "津波・土砂", "pr": "中"}, {"name": "上山口", "lat": 35.2671051, "lng": 139.6162039, "total": 1766, "rate": 42.2, "o65": 745, "severe": 51, "infant": 38, "foreign": 16, "haz": "土砂災害", "pr": "高"}, {"name": "木古庭", "lat": 35.2667892, "lng": 139.6324577, "total": 1340, "rate": 39.9, "o65": 535, "severe": 35, "infant": 31, "foreign": 21, "haz": "土砂災害", "pr": "高"}, {"name": "下山口", "lat": 35.2579832, "lng": 139.5903973, "total": 2747, "rate": 28.6, "o65": 785, "severe": 46, "infant": 99, "foreign": 32, "haz": "津波・洪水", "pr": "中〜低"}, {"name": "長柄", "lat": 35.2880152, "lng": 139.5914515, "total": 8642, "rate": 31.8, "o65": 2746, "severe": 182, "infant": 280, "foreign": 64, "haz": "津波・土砂・高潮・洪水", "pr": "中"}, {"name": "堀内", "lat": 35.2754921, "lng": 139.5733109, "total": 8241, "rate": 30.0, "o65": 2469, "severe": 161, "infant": 219, "foreign": 119, "haz": "津波・土砂", "pr": "中"}];
+const base=L.tileLayer("https://cyberjapandata.gsi.go.jp/xyz/pale/{z}/{x}/{y}.png",{attribution:"地理院タイル",maxZoom:18});
+const map=L.map("map",{layers:[base]}).setView([35.272,139.585],13);
+const HZ={
+ h_tsunami:"https://disaportaldata.gsi.go.jp/raster/04_tsunami_newlegend_pref_data/14/{z}/{x}/{y}.png",
+ h_takashio:"https://disaportaldata.gsi.go.jp/raster/03_hightide_l2_shinsuishin_pref_data/14/{z}/{x}/{y}.png",
+ h_flood:"https://disaportaldata.gsi.go.jp/raster/01_flood_l2_shinsuishin_pref_data/14/{z}/{x}/{y}.png",
+ h_kyukei:"https://disaportaldata.gsi.go.jp/raster/05_kyukeishakeikaikuiki_data/14/{z}/{x}/{y}.png",
+ h_doseki:"https://disaportaldata.gsi.go.jp/raster/05_dosekiryukeikaikuiki_data/14/{z}/{x}/{y}.png"
+};
+let curOp=0.6;
+const layers={};
+for(const id in HZ){
+ layers[id]=L.tileLayer(HZ[id],{opacity:curOp,maxZoom:18,attribution:"ハザードマップポータルサイト"});
+ document.getElementById(id).addEventListener("change",e=>{
+  e.target.checked?layers[id].addTo(map):map.removeLayer(layers[id]);
+ });
+}
+document.getElementById("op").addEventListener("input",e=>{
+ curOp=e.target.value/100;
+ for(const id in layers){layers[id].setOpacity(curOp);}
+});
+const prc={"高":"#B03024","中":"#C87E00","中〜低":"#2E7D32"};
+const markers=L.layerGroup();
+DATA.forEach(d=>{
+ const r=Math.max(18,Math.min(48,Math.sqrt(d.o65)*0.92));
+ const color=prc[d.pr]||"#888";
+ const label=d.pr==="中〜低"?"低":d.pr;
+ const icon=L.divIcon({className:"",iconSize:[r,r],iconAnchor:[r/2,r/2],
+  html:'<div class="marker-pin" style="width:'+r+'px;height:'+r+'px;background:'+color+'">'+label+'</div>'});
+ const m=L.marker([d.lat,d.lng],{icon});
+ m.bindPopup('<div class="pop"><b>'+d.name+'</b>（重点度 '+d.pr+'）<table>'
+  +'<tr><td>総人口</td><td class="v">'+d.total.toLocaleString()+'</td></tr>'
+  +'<tr><td>高齢化率</td><td class="v">'+d.rate+'%</td></tr>'
+  +'<tr><td>65歳以上</td><td class="v">'+d.o65.toLocaleString()+'人</td></tr>'
+  +'<tr><td>重度要介護(推計)</td><td class="v">約'+d.severe+'人</td></tr>'
+  +'<tr><td>乳幼児</td><td class="v">'+d.infant+'人</td></tr>'
+  +'<tr><td>外国人</td><td class="v">'+d.foreign+'人</td></tr>'
+  +'<tr><td>主なハザード</td><td class="v">'+d.haz+'</td></tr>'
+  +'</table></div>');
+ markers.addLayer(m);
+});
+markers.addTo(map);
+document.getElementById("m_priority").addEventListener("change",e=>{
+ e.target.checked?markers.addTo(map):map.removeLayer(markers);
+});
+</script>
+</body>
+</html>
