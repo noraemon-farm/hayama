@@ -7,21 +7,25 @@
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <style>
-:root{--navy:#1F3864;--red:#B03024;--amber:#C87E00;--green:#2E7D32;}
+:root{--navy:#1F3864;--red:#B03024;--amber:#C87E00;--green:#2E7D32;--teal:#0F6E56;}
 *{box-sizing:border-box;margin:0;padding:0;}
 body{font-family:"Helvetica Neue",Arial,"Hiragino Sans","Yu Gothic",sans-serif;color:#222;}
 #wrap{max-width:1100px;margin:0 auto;padding:12px;}
 h1{font-size:20px;color:var(--navy);font-weight:600;margin-bottom:2px;}
 .sub{font-size:13px;color:#666;margin-bottom:10px;}
-#map{height:560px;width:100%;border:1px solid #ccc;border-radius:8px;}
-.panel{display:flex;flex-wrap:wrap;gap:18px;margin:10px 0;padding:12px;background:#f7f7f4;border-radius:8px;}
+#map{height:580px;width:100%;border:1px solid #ccc;border-radius:8px;}
+.panel{display:flex;flex-wrap:wrap;gap:20px;margin:10px 0;padding:12px;background:#f7f7f4;border-radius:8px;}
 .group{font-size:13px;}
 .group h3{font-size:12px;color:var(--navy);margin-bottom:6px;font-weight:600;}
 label{display:flex;align-items:center;gap:6px;margin:3px 0;cursor:pointer;line-height:1.4;}
 .sw{width:14px;height:14px;border-radius:3px;display:inline-block;flex:none;border:1px solid rgba(0,0,0,.2);}
-.leg{font-size:12px;color:#555;margin-top:8px;line-height:1.6;}
+.dot{width:14px;height:14px;border-radius:50%;display:inline-block;flex:none;border:2px solid #fff;box-shadow:0 0 0 1px rgba(0,0,0,.3);}
+.leg{font-size:11px;color:#555;margin-top:8px;line-height:1.6;}
+.depthbar{display:flex;height:12px;border-radius:3px;overflow:hidden;margin:4px 0;max-width:200px;}
+.depthbar span{flex:1;}
 .note{font-size:11px;color:#888;margin-top:10px;line-height:1.7;}
 .marker-pin{border-radius:50%;border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:11px;}
+.fac-pin{border-radius:50%;border:2px solid #fff;box-shadow:0 1px 3px rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center;color:#fff;font-size:12px;}
 .pop b{color:var(--navy);}
 .pop table{border-collapse:collapse;margin-top:4px;font-size:12px;}
 .pop td{padding:1px 6px 1px 0;}
@@ -33,64 +37,91 @@ label{display:flex;align-items:center;gap:6px;margin:3px 0;cursor:pointer;line-h
 <body>
 <div id="wrap">
 <h1>葉山町 ハザード × 要配慮者 重ね合わせマップ</h1>
-<div class="sub">国土交通省「重ねるハザードマップ」の区域データと、大字別の要配慮者分布を重ねて表示。チェックで各レイヤーを切り替えられます。</div>
+<div class="sub">国土交通省「重ねるハザードマップ」の区域データに、要配慮者分布・指定避難所・要配慮者利用施設を重ねて表示。</div>
 <div class="panel">
 <div class="group">
-<h3>ハザードレイヤー（浸水系）</h3>
-<label><input type="checkbox" id="h_tsunami"><span class="sw" style="background:#3399ff"></span>津波浸水想定</label>
-<label><input type="checkbox" id="h_takashio"><span class="sw" style="background:#b088d8"></span>高潮浸水想定</label>
-<label><input type="checkbox" id="h_flood"><span class="sw" style="background:#5fb0e5"></span>洪水浸水想定</label>
+<h3>浸水ハザード（1つ選択）</h3>
+<label><input type="radio" name="flood" value="none" checked>表示しない</label>
+<label><input type="radio" name="flood" value="tsunami">津波浸水想定</label>
+<label><input type="radio" name="flood" value="takashio">高潮浸水想定</label>
+<label><input type="radio" name="flood" value="flood">洪水浸水想定</label>
+<div class="leg">浸水深の色（3種共通）:
+<div class="depthbar"><span style="background:#f7f5a9"></span><span style="background:#ffd8a8"></span><span style="background:#ff9a9a"></span><span style="background:#e57373"></span><span style="background:#c58ac5"></span></div>
+浅い ← → 深い</div>
 </div>
 <div class="group">
-<h3>土砂災害レイヤー</h3>
+<h3>土砂災害（重ねて表示可）</h3>
 <label><input type="checkbox" id="h_kyukei"><span class="sw" style="background:#e6a23c"></span>急傾斜地の崩壊</label>
 <label><input type="checkbox" id="h_doseki"><span class="sw" style="background:#d98c3c"></span>土石流</label>
-<div class="opacity-row">ハザード濃度 <input type="range" id="op" min="20" max="90" value="60"></div>
+<div class="opacity-row">ハザード濃度 <input type="range" id="op" min="20" max="90" value="55"></div>
 </div>
 <div class="group">
-<h3>要配慮者レイヤー</h3>
-<label><input type="checkbox" id="m_priority" checked><span class="sw" style="background:var(--red)"></span>重点度（大字マーカー）</label>
-<div class="leg">マーカー色＝重点度：<span style="color:var(--red)">■</span>高 <span style="color:var(--amber)">■</span>中 <span style="color:var(--green)">■</span>中〜低<br>円の大きさ＝65歳以上人口。クリックで詳細表示。</div>
+<h3>要配慮者・施設</h3>
+<label><input type="checkbox" id="m_priority" checked><span class="dot" style="background:var(--red)"></span>重点度（大字）</label>
+<label><input type="checkbox" id="m_shelter" checked><span class="fac-pin" style="width:16px;height:16px;background:var(--navy)">避</span>指定避難所</label>
+<label><input type="checkbox" id="m_care" checked><span class="fac-pin" style="width:16px;height:16px;background:var(--teal)">福</span>要配慮者利用施設</label>
+<div class="leg">大字マーカー色＝重点度：<span style="color:var(--red)">■</span>高 <span style="color:var(--amber)">■</span>中 <span style="color:var(--green)">■</span>中〜低</div>
 </div>
 </div>
 <div id="map"></div>
 <div class="note">
-出典：ハザード区域は<a href="https://disaportal.gsi.go.jp/hazardmapportal/hazardmap/copyright/opendata.html" target="_blank">ハザードマップポータルサイト（国土交通省）</a>／背景地図は地理院タイル（国土地理院）。要配慮者データは令和2年国勢調査・葉山町統計・介護保険事業状況報告に基づく（重度要介護は75歳以上按分推計）。<br>
-※ハザード区域は神奈川県配信分。津波・高潮は沿岸部、土砂災害は丘陵部でズームすると区域が表示されます。実際の避難判断は葉山町の公式ハザードマップで確認してください。
+出典：ハザード区域は<a href="https://disaportal.gsi.go.jp/hazardmapportal/hazardmap/copyright/opendata.html" target="_blank">ハザードマップポータルサイト（国土交通省）</a>／背景地図は地理院タイル（国土地理院）。避難所・施設位置はGoogle Places及び葉山町公表情報。要配慮者データは令和2年国勢調査・葉山町統計・介護保険事業状況報告に基づく（重度要介護は75歳以上按分推計）。<br>
+※浸水ハザードは津波・高潮・洪水とも「浸水深」を同じ配色（浅い黄→深い紫）で表すため、混同を避けて1つずつ表示する方式にしています。沿岸部・丘陵部でズームすると区域が表示されます。避難判断は葉山町の公式ハザードマップで確認してください。
 </div>
 </div>
 <script>
 const DATA=[{"name": "一色", "lat": 35.2668114, "lng": 139.5865752, "total": 8929, "rate": 31.3, "o65": 2791, "severe": 189, "infant": 237, "foreign": 106, "haz": "津波・土砂", "pr": "中"}, {"name": "上山口", "lat": 35.2671051, "lng": 139.6162039, "total": 1766, "rate": 42.2, "o65": 745, "severe": 51, "infant": 38, "foreign": 16, "haz": "土砂災害", "pr": "高"}, {"name": "木古庭", "lat": 35.2667892, "lng": 139.6324577, "total": 1340, "rate": 39.9, "o65": 535, "severe": 35, "infant": 31, "foreign": 21, "haz": "土砂災害", "pr": "高"}, {"name": "下山口", "lat": 35.2579832, "lng": 139.5903973, "total": 2747, "rate": 28.6, "o65": 785, "severe": 46, "infant": 99, "foreign": 32, "haz": "津波・洪水", "pr": "中〜低"}, {"name": "長柄", "lat": 35.2880152, "lng": 139.5914515, "total": 8642, "rate": 31.8, "o65": 2746, "severe": 182, "infant": 280, "foreign": 64, "haz": "津波・土砂・高潮・洪水", "pr": "中"}, {"name": "堀内", "lat": 35.2754921, "lng": 139.5733109, "total": 8241, "rate": 30.0, "o65": 2469, "severe": 161, "infant": 219, "foreign": 119, "haz": "津波・土砂", "pr": "中"}];
+const FAC={"shelters": [{"name": "一色小学校", "lat": 35.265872, "lng": 139.586996, "area": "一色"}, {"name": "葉山小学校", "lat": 35.2722687, "lng": 139.5835935, "area": "堀内"}, {"name": "上山口小学校", "lat": 35.2682029, "lng": 139.6166945, "area": "上山口"}, {"name": "長柄小学校", "lat": 35.281727, "lng": 139.583355, "area": "長柄"}, {"name": "葉山中学校", "lat": 35.2753488, "lng": 139.5882134, "area": "堀内"}, {"name": "南郷中学校", "lat": 35.2854737, "lng": 139.5995697, "area": "長柄"}], "care": [{"name": "特養 葉山グリーンヒル", "lat": 35.2683738, "lng": 139.5708626, "area": "一色", "type": "特別養護老人ホーム"}, {"name": "葉山清寿苑", "lat": 35.2630527, "lng": 139.6020752, "area": "上山口", "type": "介護老人福祉施設"}, {"name": "HAYAMA銀の杜", "lat": 35.2718739, "lng": 139.5811423, "area": "堀内", "type": "介護施設"}, {"name": "湖山医療福祉グループ 葉山の森", "lat": 35.2644212, "lng": 139.596718, "area": "一色", "type": "医療福祉施設"}, {"name": "生活リハビリクラブ葉山", "lat": 35.2848077, "lng": 139.5903371, "area": "長柄", "type": "デイサービス"}]};
 const base=L.tileLayer("https://cyberjapandata.gsi.go.jp/xyz/pale/{z}/{x}/{y}.png",{attribution:"地理院タイル",maxZoom:18});
-const map=L.map("map",{layers:[base]}).setView([35.272,139.585],13);
-const HZ={
- h_tsunami:"https://disaportaldata.gsi.go.jp/raster/04_tsunami_newlegend_pref_data/14/{z}/{x}/{y}.png",
- h_takashio:"https://disaportaldata.gsi.go.jp/raster/03_hightide_l2_shinsuishin_pref_data/14/{z}/{x}/{y}.png",
- h_flood:"https://disaportaldata.gsi.go.jp/raster/01_flood_l2_shinsuishin_pref_data/14/{z}/{x}/{y}.png",
+const map=L.map("map",{layers:[base]}).setView([35.272,139.590],13);
+
+const FLOOD={
+ tsunami:"https://disaportaldata.gsi.go.jp/raster/04_tsunami_newlegend_pref_data/14/{z}/{x}/{y}.png",
+ takashio:"https://disaportaldata.gsi.go.jp/raster/03_hightide_l2_shinsuishin_pref_data/14/{z}/{x}/{y}.png",
+ flood:"https://disaportaldata.gsi.go.jp/raster/01_flood_l2_shinsuishin_pref_data/14/{z}/{x}/{y}.png"
+};
+const SEDIMENT={
  h_kyukei:"https://disaportaldata.gsi.go.jp/raster/05_kyukeishakeikaikuiki_data/14/{z}/{x}/{y}.png",
  h_doseki:"https://disaportaldata.gsi.go.jp/raster/05_dosekiryukeikaikuiki_data/14/{z}/{x}/{y}.png"
 };
-let curOp=0.6;
-const layers={};
-for(const id in HZ){
- layers[id]=L.tileLayer(HZ[id],{opacity:curOp,maxZoom:18,attribution:"ハザードマップポータルサイト"});
+let curOp=0.55;
+
+// 浸水系＝排他（ラジオ）
+let floodLayer=null;
+document.querySelectorAll('input[name="flood"]').forEach(r=>{
+ r.addEventListener("change",e=>{
+  if(floodLayer){map.removeLayer(floodLayer);floodLayer=null;}
+  const v=e.target.value;
+  if(v!=="none"){
+   floodLayer=L.tileLayer(FLOOD[v],{opacity:curOp,maxZoom:18,attribution:"ハザードマップポータルサイト"}).addTo(map);
+  }
+ });
+});
+
+// 土砂系＝重ねOK（チェックボックス）
+const sedLayers={};
+for(const id in SEDIMENT){
+ sedLayers[id]=L.tileLayer(SEDIMENT[id],{opacity:curOp,maxZoom:18,attribution:"ハザードマップポータルサイト"});
  document.getElementById(id).addEventListener("change",e=>{
-  e.target.checked?layers[id].addTo(map):map.removeLayer(layers[id]);
+  e.target.checked?sedLayers[id].addTo(map):map.removeLayer(sedLayers[id]);
  });
 }
 document.getElementById("op").addEventListener("input",e=>{
  curOp=e.target.value/100;
- for(const id in layers){layers[id].setOpacity(curOp);}
+ if(floodLayer)floodLayer.setOpacity(curOp);
+ for(const id in sedLayers)sedLayers[id].setOpacity(curOp);
 });
+
+// 大字マーカー
 const prc={"高":"#B03024","中":"#C87E00","中〜低":"#2E7D32"};
 const markers=L.layerGroup();
 DATA.forEach(d=>{
- const r=Math.max(18,Math.min(48,Math.sqrt(d.o65)*0.92));
+ const r=Math.max(20,Math.min(48,Math.sqrt(d.o65)*0.92));
  const color=prc[d.pr]||"#888";
  const label=d.pr==="中〜低"?"低":d.pr;
  const icon=L.divIcon({className:"",iconSize:[r,r],iconAnchor:[r/2,r/2],
   html:'<div class="marker-pin" style="width:'+r+'px;height:'+r+'px;background:'+color+'">'+label+'</div>'});
- const m=L.marker([d.lat,d.lng],{icon});
+ const m=L.marker([d.lat,d.lng],{icon,zIndexOffset:100});
  m.bindPopup('<div class="pop"><b>'+d.name+'</b>（重点度 '+d.pr+'）<table>'
   +'<tr><td>総人口</td><td class="v">'+d.total.toLocaleString()+'</td></tr>'
   +'<tr><td>高齢化率</td><td class="v">'+d.rate+'%</td></tr>'
@@ -105,6 +136,34 @@ DATA.forEach(d=>{
 markers.addTo(map);
 document.getElementById("m_priority").addEventListener("change",e=>{
  e.target.checked?markers.addTo(map):map.removeLayer(markers);
+});
+
+// 指定避難所マーカー
+const shelters=L.layerGroup();
+FAC.shelters.forEach(s=>{
+ const icon=L.divIcon({className:"",iconSize:[22,22],iconAnchor:[11,11],
+  html:'<div class="fac-pin" style="width:22px;height:22px;background:#1F3864">避</div>'});
+ const m=L.marker([s.lat,s.lng],{icon,zIndexOffset:50});
+ m.bindPopup('<div class="pop"><b>'+s.name+'</b><br>指定避難所（'+s.area+'地区）</div>');
+ shelters.addLayer(m);
+});
+shelters.addTo(map);
+document.getElementById("m_shelter").addEventListener("change",e=>{
+ e.target.checked?shelters.addTo(map):map.removeLayer(shelters);
+});
+
+// 要配慮者利用施設マーカー
+const care=L.layerGroup();
+FAC.care.forEach(c=>{
+ const icon=L.divIcon({className:"",iconSize:[22,22],iconAnchor:[11,11],
+  html:'<div class="fac-pin" style="width:22px;height:22px;background:#0F6E56">福</div>'});
+ const m=L.marker([c.lat,c.lng],{icon,zIndexOffset:50});
+ m.bindPopup('<div class="pop"><b>'+c.name+'</b><br>'+c.type+'（'+c.area+'地区）<br><span style="font-size:11px;color:#888">浸水・土砂区域内なら避難確保計画の作成義務対象</span></div>');
+ care.addLayer(m);
+});
+care.addTo(map);
+document.getElementById("m_care").addEventListener("change",e=>{
+ e.target.checked?care.addTo(map):map.removeLayer(care);
 });
 </script>
 </body>
