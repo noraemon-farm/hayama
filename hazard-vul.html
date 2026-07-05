@@ -61,6 +61,13 @@ label{display:flex;align-items:center;gap:6px;margin:3px 0;cursor:pointer;line-h
 <label><input type="checkbox" id="h_doseki">土石流</label>
 </div>
 <div class="group">
+<h3>道路幅員</h3>
+<label><input type="checkbox" id="r_wide"><span class="sw" style="background:#2e8b57"></span>5.5m以上</label>
+<label><input type="checkbox" id="r_mid"><span class="sw" style="background:#7b3ff2"></span>3〜5.5m</label>
+<label><input type="checkbox" id="r_narrow"><span class="sw" style="background:#e05a8a"></span>3m未満</label>
+<div class="leg">出典：国土数値情報 道路データ(幅員区分)。3m未満・3〜5.5mは施設から半径800m以内のみ、5.5m以上は全域を表示。</div>
+</div>
+<div class="group">
 <h3>要配慮者・施設</h3>
 <label><input type="checkbox" id="m_priority" checked><span class="dot" style="background:var(--red)"></span>重点度（大字）</label>
 <label><input type="checkbox" id="m_shelter" checked><span class="fac-sq" style="background:var(--navy)">避</span>指定避難所</label>
@@ -68,14 +75,6 @@ label{display:flex;align-items:center;gap:6px;margin:3px 0;cursor:pointer;line-h
 <label><input type="checkbox" id="m_child" checked><span class="fac-sq" style="background:#d98032">子</span>幼稚園・保育園・こども園</label>
 <label><input type="checkbox" id="m_hosp" checked><span class="fac-sq" style="background:#b03a48">病</span>病院（入院病床）</label>
 <div class="leg">大字マーカー色＝重点度（〇）：<span style="color:var(--red)">●</span>高 <span style="color:var(--amber)">●</span>中 <span style="color:var(--green)">●</span>中〜低<br>施設は■で表示。施設類型は参考データ（下記注記）。</div>
-</div>
-</div>
-<div class="group">
-<h3>道路幅員</h3>
-<label><input type="checkbox" id="r_wide"><span class="sw" style="background:#2e8b57"></span>5.5m以上</label>
-<label><input type="checkbox" id="r_mid"><span class="sw" style="background:#7b3ff2"></span>3〜5.5m</label>
-<label><input type="checkbox" id="r_narrow"><span class="sw" style="background:#e05a8a"></span>3m未満</label>
-<div class="leg">出典：国土数値情報 道路データ(幅員区分)。3m未満・3〜5.5mは施設から半径800m以内のみ、5.5m以上は全域を表示。</div>
 </div>
 <div class="group">
 <h3>125mメッシュ人口</h3>
