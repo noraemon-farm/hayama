@@ -103,6 +103,8 @@ const base=L.tileLayer("https://cyberjapandata.gsi.go.jp/xyz/pale/{z}/{x}/{y}.pn
 const map=L.map("map",{layers:[base]}).setView([35.272,139.590],13);
 map.createPane("meshPane");
 map.getPane("meshPane").style.zIndex=350;
+map.createPane("roadsPane");
+map.getPane("roadsPane").style.zIndex=500;
 
 const FLOOD={
  tsunami:"https://disaportaldata.gsi.go.jp/raster/04_tsunami_newlegend_pref_data/14/{z}/{x}/{y}.png",
@@ -205,11 +207,11 @@ document.getElementById("m_hosp").addEventListener("change",e=>{
 // 道路幅員レイヤー
 function toLL(line){return line.map(p=>[p[1],p[0]]);}
 const wideLayer=L.layerGroup();
-ROADS.wide.forEach(l=>L.polyline(toLL(l),{color:"#034efc",weight:4,opacity:0.85}).addTo(wideLayer));
+ROADS.wide.forEach(l=>L.polyline(toLL(l),{pane:"roadsPane",color:"#034efc",weight:4,opacity:0.85}).addTo(wideLayer));
 const midLayer=L.layerGroup();
-ROADS.mid_near.forEach(l=>L.polyline(toLL(l),{color:"#03fcec",weight:3,opacity:0.9}).addTo(midLayer));
+ROADS.mid_near.forEach(l=>L.polyline(toLL(l),{pane:"roadsPane",color:"#03fcec",weight:3,opacity:0.9}).addTo(midLayer));
 const narrowLayer=L.layerGroup();
-ROADS.narrow_near.forEach(l=>L.polyline(toLL(l),{color:"#e05a8a",weight:3,opacity:0.95}).addTo(narrowLayer));
+ROADS.narrow_near.forEach(l=>L.polyline(toLL(l),{pane:"roadsPane",color:"#e05a8a",weight:3,opacity:0.95}).addTo(narrowLayer));
 document.getElementById("r_wide").addEventListener("change",e=>{e.target.checked?wideLayer.addTo(map):map.removeLayer(wideLayer);});
 document.getElementById("r_mid").addEventListener("change",e=>{e.target.checked?midLayer.addTo(map):map.removeLayer(midLayer);});
 document.getElementById("r_narrow").addEventListener("change",e=>{e.target.checked?narrowLayer.addTo(map):map.removeLayer(narrowLayer);});
