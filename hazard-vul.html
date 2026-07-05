@@ -62,8 +62,8 @@ label{display:flex;align-items:center;gap:6px;margin:3px 0;cursor:pointer;line-h
 </div>
 <div class="group">
 <h3>道路幅員</h3>
-<label><input type="checkbox" id="r_wide"><span class="sw" style="background:#1ba3e0"></span>5.5m以上</label>
-<label><input type="checkbox" id="r_mid"><span class="sw" style="background:#e7ff00"></span>3〜5.5m</label>
+<label><input type="checkbox" id="r_wide"><span class="sw" style="background:#034efc"></span>5.5m以上</label>
+<label><input type="checkbox" id="r_mid"><span class="sw" style="background:#03fcec"></span>3〜5.5m</label>
 <label><input type="checkbox" id="r_narrow"><span class="sw" style="background:#e05a8a"></span>3m未満</label>
 </div>
 <div class="group">
@@ -81,6 +81,7 @@ label{display:flex;align-items:center;gap:6px;margin:3px 0;cursor:pointer;line-h
 <label><input type="radio" name="mesh" value="o75">75歳以上人口</label>
 <label><input type="radio" name="mesh" value="c09">0〜9歳人口</label>
 <label><input type="radio" name="mesh" value="solo">65歳以上単身世帯</label>
+<div class="opacity-row" id="meshopacity" style="display:none;align-items:center;gap:8px;font-size:12px;margin-top:6px">濃さ <input type="range" id="meshop" min="20" max="90" value="60" style="width:110px"></div>
 <div class="leg" id="meshleg" style="display:none"></div>
 </div>
 </div>
@@ -202,9 +203,9 @@ document.getElementById("m_hosp").addEventListener("change",e=>{
 // 道路幅員レイヤー
 function toLL(line){return line.map(p=>[p[1],p[0]]);}
 const wideLayer=L.layerGroup();
-ROADS.wide.forEach(l=>L.polyline(toLL(l),{color:"#1ba3e0",weight:4,opacity:0.85}).addTo(wideLayer));
+ROADS.wide.forEach(l=>L.polyline(toLL(l),{color:"#034efc",weight:4,opacity:0.85}).addTo(wideLayer));
 const midLayer=L.layerGroup();
-ROADS.mid_near.forEach(l=>L.polyline(toLL(l),{color:"#e7ff00",weight:3,opacity:0.9}).addTo(midLayer));
+ROADS.mid_near.forEach(l=>L.polyline(toLL(l),{color:"#03fcec",weight:3,opacity:0.9}).addTo(midLayer));
 const narrowLayer=L.layerGroup();
 ROADS.narrow_near.forEach(l=>L.polyline(toLL(l),{color:"#e05a8a",weight:3,opacity:0.95}).addTo(narrowLayer));
 document.getElementById("r_wide").addEventListener("change",e=>{e.target.checked?wideLayer.addTo(map):map.removeLayer(wideLayer);});
@@ -223,20 +224,23 @@ function binColor(v,cfg){
  return null;
 }
 let meshLayer=null;
+let meshOpacity=0.6;
 function drawMesh(key){
  if(meshLayer){map.removeLayer(meshLayer);meshLayer=null;}
- if(key==="none"){document.getElementById("meshleg").style.display="none";return;}
+ if(key==="none"){document.getElementById("meshleg").style.display="none";document.getElementById("meshopacity").style.display="none";return;}
+ document.getElementById("meshopacity").style.display="flex";
  const cfg=meshBins[key];
  const vk=(key==="o75")?"o":(key==="c09")?"c":"s";
  meshLayer=L.layerGroup();
  MESH.forEach(m=>{
   const v=m[vk]||0; const col=binColor(v,cfg);
   if(!col)return;
-  L.rectangle([[m.b[1],m.b[0]],[m.b[3],m.b[2]]],{stroke:false,fillColor:col,fillOpacity:0.6})
+  L.rectangle([[m.b[1],m.b[0]],[m.b[3],m.b[2]]],{stroke:false,fillColor:col,fillOpacity:meshOpacity})
    .bindPopup(cfg.label+' '+v+cfg.unit+' / 総人口 '+m.t+'人<br><span style="font-size:11px;color:#888">125mメッシュ</span>')
    .addTo(meshLayer);
  });
  meshLayer.addTo(map);
+ [wideLayer,midLayer,narrowLayer].forEach(function(L2){if(map.hasLayer(L2))L2.bringToFront();});
  // 凡例生成
  const b=cfg.breaks, c=cfg.colors;
  let html='<b>'+cfg.label+'</b>（人/メッシュ）<br>';
@@ -250,6 +254,11 @@ function drawMesh(key){
 }
 document.querySelectorAll('input[name="mesh"]').forEach(r=>{
  r.addEventListener("change",e=>drawMesh(e.target.value));
+});
+document.getElementById("meshop").addEventListener("input",function(e){
+ meshOpacity=e.target.value/100;
+ var sel=document.querySelector('input[name="mesh"]:checked');
+ if(sel&&sel.value!=="none")drawMesh(sel.value);
 });
 
 
