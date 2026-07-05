@@ -63,7 +63,7 @@ label{display:flex;align-items:center;gap:6px;margin:3px 0;cursor:pointer;line-h
 <div class="group">
 <h3>道路幅員</h3>
 <label><input type="checkbox" id="r_wide"><span class="sw" style="background:#1ba3e0"></span>5.5m以上</label>
-<label><input type="checkbox" id="r_mid"><span class="sw" style="background:#7cb342"></span>3〜5.5m</label>
+<label><input type="checkbox" id="r_mid"><span class="sw" style="background:#9acd00"></span>3〜5.5m</label>
 <label><input type="checkbox" id="r_narrow"><span class="sw" style="background:#e05a8a"></span>3m未満</label>
 </div>
 <div class="group">
@@ -204,7 +204,7 @@ function toLL(line){return line.map(p=>[p[1],p[0]]);}
 const wideLayer=L.layerGroup();
 ROADS.wide.forEach(l=>L.polyline(toLL(l),{color:"#1ba3e0",weight:4,opacity:0.85}).addTo(wideLayer));
 const midLayer=L.layerGroup();
-ROADS.mid_near.forEach(l=>L.polyline(toLL(l),{color:"#7cb342",weight:3,opacity:0.9}).addTo(midLayer));
+ROADS.mid_near.forEach(l=>L.polyline(toLL(l),{color:"#9acd00",weight:3,opacity:0.9}).addTo(midLayer));
 const narrowLayer=L.layerGroup();
 ROADS.narrow_near.forEach(l=>L.polyline(toLL(l),{color:"#e05a8a",weight:3,opacity:0.95}).addTo(narrowLayer));
 document.getElementById("r_wide").addEventListener("change",e=>{e.target.checked?wideLayer.addTo(map):map.removeLayer(wideLayer);});
